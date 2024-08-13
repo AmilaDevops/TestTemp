@@ -50,7 +50,8 @@
         "properties": {
           "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
           "siteConfig": {
-            "appSettings": "[variables('appSettings')]"
+            "appSettings": "[variables('appSettings')]",
+            "netFrameworkVersion": "v3.1" 
           }
         },
         "identity": {
