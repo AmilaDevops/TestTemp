@@ -1,0 +1,67 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "appName": {
+        "type": "string"
+      },
+      "appSettings": {
+          "type": "array"
+      }
+    },
+    "variables": {
+      "functionAppName": "[parameters('appName')]",
+      "hostingPlanName": "[parameters('appName')]",
+      "copy": [
+            {
+                "name": "appSettings",
+                "count": "[length(parameters('appSettings'))]",
+                "input": {
+                    "name": "[split(parameters('appSettings')[copyIndex('appSettings')],'|')[0]]",
+                    "value": "[split(parameters('appSettings')[copyIndex('appSettings')],'|')[1]]"
+                }
+            }
+        ]
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Web/serverfarms",
+        "apiVersion": "2020-06-01",
+        "name": "[variables('hostingPlanName')]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "Y1",
+          "tier": "Dynamic"
+        },
+        "properties": {
+          "name": "[variables('hostingPlanName')]",
+          "computeMode": "Dynamic"
+        }
+      },
+      {
+        "type": "Microsoft.Web/sites",
+        "apiVersion": "2020-06-01",
+        "name": "[variables('functionAppName')]",
+        "location": "[resourceGroup().location]",
+        "kind": "functionapp",
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
+        ],
+        "properties": {
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+          "siteConfig": {
+            "appSettings": "[variables('appSettings')]"
+          }
+        },
+        "identity": {
+            "type": "SystemAssigned"
+        }
+      }
+    ],
+    "outputs": {
+      "principalID": {
+        "type": "string",
+        "value": "[reference(resourceId('Microsoft.Web/sites', parameters('appName')), '2020-06-01', 'full').identity.principalId]"
+      }
+    }
+  }
