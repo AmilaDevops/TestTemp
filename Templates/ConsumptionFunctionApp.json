@@ -51,7 +51,9 @@
           "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
           "siteConfig": {
             "appSettings": "[variables('appSettings')]",
-            "netFrameworkVersion": "v3.1" 
+            "netFrameworkVersion": "v4.8",
+            "use32BitWorkerProcess": true,
+            "functionsWorkerRuntime": "dotnet-isolated" 
           }
         },
         "identity": {
